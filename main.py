@@ -30,34 +30,19 @@ def main():
   # listar arquivos da pasta data
   caminhos = [os.path.join("data", nome) for nome in os.listdir("data")]
   arquivos = [arq for arq in caminhos if os.path.isfile(arq)]
-  fasta = [arq[5:] for arq in arquivos if arq.lower().endswith(".fasta")]
+  fasta = [arq[5:] for arq in arquivos if arq.lower().endswith(".pdf")]
 
 
   questions = [
     inquirer.List(
-      'filename1',
-      message="Selecione o primeiro arquivo: ",
-      choices=fasta,
-    ),
-    inquirer.List(
-     'filename2',
-      message="Selecione o segundo arquivo: ",
-      choices=fasta,
-    ),
-    inquirer.Confirm(
-      'gerarHtml',
-      message="Deseja gerar o arquivo de comparação visual?" ,
-      default=True),
-    inquirer.Confirm(
-      'gerarGrafico',
-      message="Deseja gerar o gráfico de dispersão?" ,
-      default=True),
-    
+      'filename',
+      message="Selecione o arquivo: ",
+      choices=pdf,
+    )    
   ]
 
   answers = inquirer.prompt(questions)
-  filename1 =  answers["filename1"]
-  filename2 =  answers["filename2"]
+  filename =  answers["filename"]
 
   
   if (os.path.exists('output') == False):
@@ -66,10 +51,6 @@ def main():
     except:
       print("Não foi possível criar diretório") 
 
-  if(answers['gerarHtml']):
-    density.generateDensityView(filename1=filename1, filename2=filename2)
-  if(answers['gerarGrafico']):  
-    densityChart.generateChart(filename1=filename1, filename2=filename2)
 
   animationLoading.load_animation()
 
