@@ -67,4 +67,6 @@ def simple_find_cpfs(filename):
 def process_text(filename):
     cpfs = simple_find_cpfs(filename)
 
+    print("cpfs encontrados: ", cpfs)
+
 
