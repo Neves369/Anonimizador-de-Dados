@@ -1,3 +1,7 @@
+import fitz
+from modules import processText
+
+
 def verify_pdf(filename):
     caminho_completo = "data\\" + filename
     try:
@@ -55,14 +59,19 @@ def read_pdf(filename):
 
     try:
         match typePDF:
-        case "texto":
-            # aqui entra o processamento de texto
-        case "escaneado":
-            
-        case "indefinido":
-            
-        case _:  # Default case
+            case "texto":
+                processText.process_text(filename)
+                # aqui entra o processamento de texto
+                pass
+            case "escaneado":
+                # aqui entra o processamento de PDFs escaneados
+                pass
+            case "indefinido":
+                # aqui entra o processamento para PDFs indefinidos
+                pass
+            case _:  # Default case
+                # caso padrão
+                pass
             
     except:
-
-
+        print("deu ruim")

@@ -31,14 +31,14 @@ def main():
   # listar arquivos da pasta data
   caminhos = [os.path.join("data", nome) for nome in os.listdir("data")]
   arquivos = [arq for arq in caminhos if os.path.isfile(arq)]
-  fasta = [arq[5:] for arq in arquivos if arq.lower().endswith(".pdf")]
+  pdfs = [arq[5:] for arq in arquivos if arq.lower().endswith(".pdf")]
 
 
   questions = [
     inquirer.List(
       'filename',
       message="Selecione o arquivo: ",
-      choices=pdf,
+      choices=pdfs,
     )    
   ]
 

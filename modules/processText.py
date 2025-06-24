@@ -1,4 +1,8 @@
 # Verifica se é um CPF válido, de acordo com os cálculos da Receita Federal 
+import re
+import fitz
+
+
 def verifica_cpf(strCPF: str) -> bool:
     strCPF = ''.join(filter(str.isdigit, strCPF))
 
@@ -27,7 +31,7 @@ def verifica_cpf(strCPF: str) -> bool:
         Soma = Soma + int(strCPF[i]) * (11 - i) 
     Resto = (Soma * 10) % 11
 
-    if (Resto == 10) || (Resto == 11):
+    if (Resto == 10) or (Resto == 11):
         Resto = 0
     
     if Resto != int(strCPF[10]):
@@ -41,7 +45,8 @@ def simple_find_cpfs(filename):
     regex_cpf = r'\b(?:\d{3}[\s.-]?\d{3}[\s.-]?\d{3}[\s.-]?\d{2}|\d{11})\b'
 
     try:
-        doc = fitz.open(filename)
+        caminho_completo = "data\\" + filename
+        doc = fitz.open(caminho_completo)
         
         for pagina_num in range(doc.page_count):
             pagina = doc[pagina_num]
@@ -51,7 +56,7 @@ def simple_find_cpfs(filename):
                 cpfs_na_pagina = re.findall(regex_cpf, texto_pagina)
                 for cpf in cpfs_na_pagina:
                     cpf_limpo = re.sub(r'[\s.-]', '', cpf)
-                    if len(cpf_limpo) == 11 and verifica_cpf(cpf_limpo) and cpf_limpo not in cpfs_encontrados_validos:
+                    if len(cpf_limpo) == 11 and verifica_cpf(cpf_limpo):
                         cpfs_encontrados.append(cpf_limpo)
         
         doc.close()
