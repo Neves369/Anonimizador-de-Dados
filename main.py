@@ -1,6 +1,7 @@
 import os
-from modules import density, densityChart, animationLoading
+import fitz
 import inquirer
+from modules import read
 
 def main():
 
@@ -51,8 +52,9 @@ def main():
     except:
       print("Não foi possível criar diretório") 
 
+  read.processPDF(filename=filename)
 
-  animationLoading.load_animation()
+#   animationLoading.load_animation()
 
   print("""
   -------------------------------------------------------------------
@@ -64,7 +66,7 @@ def main():
   ╚██████╚██████╔██║ ╚═╝ ████║    ██████████████╗  ██║  ███████╗
   ╚═════╝╚═════╝╚═╝     ╚═╚═╝    ╚══════╚══════╝  ╚═╝  ╚══════╝
 
-  -------------GERADOS ARQUIVOS DE VISUALIZAÇÃO----------------------
+  -------------GERADO NOVO ARQUIVO EDITADO---------------------------
                   --confira a pasta output--
   """) 
 
