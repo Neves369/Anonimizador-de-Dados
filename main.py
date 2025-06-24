@@ -52,7 +52,7 @@ def main():
     except:
       print("Não foi possível criar diretório") 
 
-  read.processPDF(filename=filename)
+  read.read_pdf(filename=filename)
 
 #   animationLoading.load_animation()
 

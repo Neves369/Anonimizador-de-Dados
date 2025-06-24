@@ -1,4 +1,4 @@
-def verifyPDF(filename):
+def verify_pdf(filename):
     caminho_completo = "data\\" + filename
     try:
         doc = fitz.open(caminho_completo)
@@ -49,13 +49,14 @@ def verifyPDF(filename):
         print(f"Erro inesperado ao processar '{filename}': {e}")
         return "erro"
 
-def processPDF(filename):
-    typePDF = verifyPDF(filename)
+# Lê o pdf e segue a melhor abordagem para processamento do mesmo
+def read_pdf(filename):
+    typePDF = verify_pdf(filename)
 
     try:
         match typePDF:
         case "texto":
-            
+            # aqui entra o processamento de texto
         case "escaneado":
             
         case "indefinido":
@@ -63,4 +64,5 @@ def processPDF(filename):
         case _:  # Default case
             
     except:
+
 
