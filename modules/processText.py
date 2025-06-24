@@ -39,10 +39,12 @@ def verifica_cpf(strCPF: str) -> bool:
 
     return True
 
-# Usa Regex para uma verificação simples de CPF's (encontra CPF's)
-def simple_find_cpfs(filename):
+# Usa Regex para uma verificação simples de CPF's e Telefones
+def simple_find(filename):
     cpfs_encontrados = []
+    telefones_encontrados = []
     regex_cpf = r'\b(?:\d{3}[\s.-]?\d{3}[\s.-]?\d{3}[\s.-]?\d{2}|\d{11})\b'
+    regex_telefone = r'\(?\d{2}\)?\s?-?\d{4,5}\s?-?\d{4}'
 
     try:
         caminho_completo = "data\\" + filename
@@ -54,6 +56,12 @@ def simple_find_cpfs(filename):
             
             if texto_pagina:
                 cpfs_na_pagina = re.findall(regex_cpf, texto_pagina)
+                telefones_na_pagina = re.findall(regex_telefone, texto_pagina)
+
+                for telefone in telefones_na_pagina:
+                    telefone_limpo = re.sub(r'[\s().-]', '', telefone)
+                    telefones_encontrados.append(telefone_limpo)
+
                 for cpf in cpfs_na_pagina:
                     cpf_limpo = re.sub(r'[\s.-]', '', cpf)
                     if len(cpf_limpo) == 11 and verifica_cpf(cpf_limpo):
@@ -66,12 +74,14 @@ def simple_find_cpfs(filename):
     except Exception as e:
         print(f"Ocorreu um erro ao ler o PDF: {e}")
 
-    return cpfs_encontrados
+    return cpfs_encontrados, telefones_encontrados
 
 # Processa o texto buscando dados pressoais
 def process_text(filename):
-    cpfs = simple_find_cpfs(filename)
+    cpfs_encontrados, telefones_encontrados = simple_find(filename)
 
-    print("cpfs encontrados: ", cpfs)
+    print("cpfs encontrados: ", cpfs_encontrados)
+    print("telefones encontrados: ", telefones_encontrados)
+
 
 
