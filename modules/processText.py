@@ -80,6 +80,7 @@ def simple_find(filename):
                             tarja_cpf(cpf),
                             texto_pagina_mod
                         )
+                        
                 texto_modificado += texto_pagina_mod
 
         doc.close()
