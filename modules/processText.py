@@ -1,8 +1,7 @@
-# Verifica se é um CPF válido, de acordo com os cálculos da Receita Federal 
 import re
 import fitz
 
-
+# Verifica se é um CPF válido, de acordo com os cálculos da Receita Federal 
 def verifica_cpf(strCPF: str) -> bool:
     strCPF = ''.join(filter(str.isdigit, strCPF))
 
@@ -39,34 +38,51 @@ def verifica_cpf(strCPF: str) -> bool:
 
     return True
 
+# Tarja o CPF  
+def tarja_cpf(cpf: str) -> str:
+    cpf_limpo = re.sub(r'[\s.-]', '', cpf)
+    # print(f"CPF limpo: {cpf_limpo}")
+    return f"**************"
+  
+
 # Usa Regex para uma verificação simples de CPF's e Telefones
 def simple_find(filename):
     cpfs_encontrados = []
     telefones_encontrados = []
     regex_cpf = r'\b(?:\d{3}[\s.-]?\d{3}[\s.-]?\d{3}[\s.-]?\d{2}|\d{11})\b'
     regex_telefone = r'\(?\d{2}\)?\s?-?\d{4,5}\s?-?\d{4}'
+    texto_modificado = ""
 
     try:
         caminho_completo = "data\\" + filename
         doc = fitz.open(caminho_completo)
-        
+       
         for pagina_num in range(doc.page_count):
             pagina = doc[pagina_num]
             texto_pagina = pagina.get_text("text")
-            
+            texto_pagina_mod = texto_pagina
+
             if texto_pagina:
                 cpfs_na_pagina = re.findall(regex_cpf, texto_pagina)
                 telefones_na_pagina = re.findall(regex_telefone, texto_pagina)
 
-                for telefone in telefones_na_pagina:
-                    telefone_limpo = re.sub(r'[\s().-]', '', telefone)
-                    telefones_encontrados.append(telefone_limpo)
+                # for telefone in telefones_na_pagina:
+                #     telefone_limpo = re.sub(r'[\s().-]', '', telefone)
+                #     telefones_encontrados.append(telefone_limpo)
 
                 for cpf in cpfs_na_pagina:
                     cpf_limpo = re.sub(r'[\s.-]', '', cpf)
                     if len(cpf_limpo) == 11 and verifica_cpf(cpf_limpo):
                         cpfs_encontrados.append(cpf_limpo)
-        
+
+                        texto_pagina_mod = re.sub(
+                            re.escape(cpf),
+                            tarja_cpf(cpf),
+                            texto_pagina_mod
+                        )
+                        
+                texto_modificado += texto_pagina_mod
+
         doc.close()
             
     except fitz.FileNotFoundError:
@@ -74,14 +90,13 @@ def simple_find(filename):
     except Exception as e:
         print(f"Ocorreu um erro ao ler o PDF: {e}")
 
-    return cpfs_encontrados, telefones_encontrados
+    return cpfs_encontrados, telefones_encontrados, texto_modificado
 
 # Processa o texto buscando dados pressoais
 def process_text(filename):
-    cpfs_encontrados, telefones_encontrados = simple_find(filename)
+    cpfs_encontrados, telefones_encontrados, texto_modificado = simple_find(filename)
 
     print("cpfs encontrados: ", cpfs_encontrados)
-    print("telefones encontrados: ", telefones_encontrados)
-
-
+    # print("telefones encontrados: ", telefones_encontrados)
+    print("Texto modificado: ", texto_modificado[:10000])  
 
