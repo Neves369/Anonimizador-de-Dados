@@ -60,9 +60,7 @@ def read_pdf(filename):
     try:
         match typePDF:
             case "texto":
-                processText.process_text(filename)
-                # aqui entra o processamento de texto
-                pass
+                return processText.process_text(filename)
             case "escaneado":
                 # aqui entra o processamento de PDFs escaneados
                 pass
