@@ -1,7 +1,7 @@
 import re
 import os
 import fitz 
-
+import spacy
 
 # Verificação simples de CPF e Telefone
 def simple_find(filename):
@@ -30,7 +30,31 @@ def simple_find(filename):
     doc.save(caminho_saida)
     print(f"Novo arquivo gerado: {caminho_saida}")
 
+# Verificação profunda usando machine learning
+def extensive_find(filename):
+    import fitz
+    nlp = spacy.load("pt_core_news_lg")
+    caminho_saida = os.path.join('output', f"{os.path.splitext(filename)[0]}_tarjado_extensivo.pdf")
+    doc = fitz.open(os.path.join('output', f"{os.path.splitext(filename)[0]}_tarjado.pdf"))
+
+    entidades_sensiveis = ["PER", "LOC", "ORG", "DATE"]  # Pessoa, Local, Organização, Data
+
+    for pagina in doc:
+        texto_pagina = pagina.get_text()
+        doc_spacy = nlp(texto_pagina)
+        for ent in doc_spacy.ents:
+            if ent.label_ in entidades_sensiveis:
+                for match in re.findall(re.escape(ent.text), texto_pagina):
+                    areas = pagina.search_for(match)
+                    for area in areas:
+                        pagina.add_redact_annot(area, fill=(0, 0, 0), text="[DADO SENSÍVEL]")
+        pagina.apply_redactions(images=fitz.PDF_REDACT_IMAGE_NONE)
+
+    doc.save(caminho_saida)
+    print(f"Arquivo extensivamente anonimizado: {caminho_saida}")
+
 # Função principal para processar o texto do PDF
 def process_text(filename):
     simple_find(filename)
+    extensive_find(filename)
 

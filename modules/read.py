@@ -71,5 +71,6 @@ def read_pdf(filename):
                 # caso padrão
                 pass
             
-    except:
-        print("deu ruim")
+    except Exception as error:
+
+        print("deu ruim: ", error)
