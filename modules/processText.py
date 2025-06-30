@@ -56,5 +56,5 @@ def extensive_find(filename):
 # Função principal para processar o texto do PDF
 def process_text(filename):
     simple_find(filename)
-    extensive_find(filename)
+    # extensive_find(filename)
 
