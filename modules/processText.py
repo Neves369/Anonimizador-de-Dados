@@ -1,102 +1,60 @@
 import re
-import fitz
+import os
+import fitz 
+import spacy
 
-# Verifica se é um CPF válido, de acordo com os cálculos da Receita Federal 
-def verifica_cpf(strCPF: str) -> bool:
-    strCPF = ''.join(filter(str.isdigit, strCPF))
-
-    if len(strCPF) != 11:
-        return False
-
-    if len(set(strCPF)) == 1: 
-        return False
-
-    Soma = 0
-    Resto = 0
-
-    for i in range(9): 
-        Soma = Soma + int(strCPF[i]) * (10 - i) 
-    Resto = (Soma * 10) % 11
-
-    if (Resto == 10) or (Resto == 11):
-        Resto = 0
-    
-    if Resto != int(strCPF[9]):
-        return False
-
-    Soma = 0
- 
-    for i in range(10): 
-        Soma = Soma + int(strCPF[i]) * (11 - i) 
-    Resto = (Soma * 10) % 11
-
-    if (Resto == 10) or (Resto == 11):
-        Resto = 0
-    
-    if Resto != int(strCPF[10]):
-        return False
-
-    return True
-
-# Tarja o CPF  
-def tarja_cpf(cpf: str) -> str:
-    cpf_limpo = re.sub(r'[\s.-]', '', cpf)
-    # print(f"CPF limpo: {cpf_limpo}")
-    return f"**************"
-  
-
-# Usa Regex para uma verificação simples de CPF's e Telefones
+# Verificação simples de CPF e Telefone
 def simple_find(filename):
-    cpfs_encontrados = []
-    telefones_encontrados = []
-    regex_cpf = r'\b(?:\d{3}[\s.-]?\d{3}[\s.-]?\d{3}[\s.-]?\d{2}|\d{11})\b'
-    regex_telefone = r'\(?\d{2}\)?\s?-?\d{4,5}\s?-?\d{4}'
-    texto_modificado = ""
+    caminho_arquivo = os.path.join('data', filename)
+    nome_arquivo, ext = os.path.splitext(filename)
+    caminho_saida = os.path.join('output', f"{nome_arquivo}_tarjado{ext}")
 
-    try:
-        caminho_completo = "data\\" + filename
-        doc = fitz.open(caminho_completo)
-       
-        for pagina_num in range(doc.page_count):
-            pagina = doc[pagina_num]
-            texto_pagina = pagina.get_text("text")
-            texto_pagina_mod = texto_pagina
+    doc = fitz.open(caminho_arquivo)
 
-            if texto_pagina:
-                cpfs_na_pagina = re.findall(regex_cpf, texto_pagina)
-                telefones_na_pagina = re.findall(regex_telefone, texto_pagina)
+    padroes = [
+        (r'\d{3}\.\d{3}\.\d{3}-\d{2}', "XXX.XXX.XXX-XX"),  # CPF
+        (r'\d{2}\.\d{3}\.\d{3}-\d{1}', "XX.XXX.XXX-X"),  # RG
+        (r'\(\d{2}\)\s?\d{4,5}-\d{4}', "(XX) XXXXX-XXXX"), # Telefone
+    ]
 
-                # for telefone in telefones_na_pagina:
-                #     telefone_limpo = re.sub(r'[\s().-]', '', telefone)
-                #     telefones_encontrados.append(telefone_limpo)
+    for pagina in doc:
+        texto_pagina = pagina.get_text()
+        for padrao, texto_substituto in padroes:
+            for match in re.findall(padrao, texto_pagina):
+                areas = pagina.search_for(match)
+                for area in areas:
+                    # Aplica a tarja e substitui o texto por texto genérico
+                    pagina.add_redact_annot(area, fill=(0, 0, 0), text=texto_substituto)
+        pagina.apply_redactions(images=fitz.PDF_REDACT_IMAGE_NONE)
 
-                for cpf in cpfs_na_pagina:
-                    cpf_limpo = re.sub(r'[\s.-]', '', cpf)
-                    if len(cpf_limpo) == 11 and verifica_cpf(cpf_limpo):
-                        cpfs_encontrados.append(cpf_limpo)
+    doc.save(caminho_saida)
+    print(f"Novo arquivo gerado: {caminho_saida}")
 
-                        texto_pagina_mod = re.sub(
-                            re.escape(cpf),
-                            tarja_cpf(cpf),
-                            texto_pagina_mod
-                        )
-                        
-                texto_modificado += texto_pagina_mod
+# Verificação profunda usando machine learning
+def extensive_find(filename):
+    import fitz
+    nlp = spacy.load("pt_core_news_lg")
+    caminho_saida = os.path.join('output', f"{os.path.splitext(filename)[0]}_tarjado_extensivo.pdf")
+    doc = fitz.open(os.path.join('output', f"{os.path.splitext(filename)[0]}_tarjado.pdf"))
 
-        doc.close()
-            
-    except fitz.FileNotFoundError:
-        print(f"Erro: O arquivo PDF '{filename}' não foi encontrado.")
-    except Exception as e:
-        print(f"Ocorreu um erro ao ler o PDF: {e}")
+    entidades_sensiveis = ["PER", "LOC", "ORG", "DATE"]  # Pessoa, Local, Organização, Data
 
-    return cpfs_encontrados, telefones_encontrados, texto_modificado
+    for pagina in doc:
+        texto_pagina = pagina.get_text()
+        doc_spacy = nlp(texto_pagina)
+        for ent in doc_spacy.ents:
+            if ent.label_ in entidades_sensiveis:
+                for match in re.findall(re.escape(ent.text), texto_pagina):
+                    areas = pagina.search_for(match)
+                    for area in areas:
+                        pagina.add_redact_annot(area, fill=(0, 0, 0), text="[DADO SENSÍVEL]")
+        pagina.apply_redactions(images=fitz.PDF_REDACT_IMAGE_NONE)
 
-# Processa o texto buscando dados pressoais
+    doc.save(caminho_saida)
+    print(f"Arquivo extensivamente anonimizado: {caminho_saida}")
+
+# Função principal para processar o texto do PDF
 def process_text(filename):
-    cpfs_encontrados, telefones_encontrados, texto_modificado = simple_find(filename)
-
-    print("cpfs encontrados: ", cpfs_encontrados)
-    # print("telefones encontrados: ", telefones_encontrados)
-    print("Texto modificado: ", texto_modificado[:10000])  
+    simple_find(filename)
+    extensive_find(filename)
 

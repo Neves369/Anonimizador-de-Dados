@@ -61,8 +61,6 @@ def read_pdf(filename):
         match typePDF:
             case "texto":
                 processText.process_text(filename)
-                # aqui entra o processamento de texto
-                pass
             case "escaneado":
                 # aqui entra o processamento de PDFs escaneados
                 pass
@@ -73,5 +71,6 @@ def read_pdf(filename):
                 # caso padrão
                 pass
             
-    except:
-        print("deu ruim")
+    except Exception as error:
+
+        print("deu ruim: ", error)
