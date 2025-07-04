@@ -74,3 +74,4 @@ def read_pdf(filename):
     except Exception as error:
 
         print("deu ruim: ", error)
+
