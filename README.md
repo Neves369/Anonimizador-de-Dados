@@ -1,37 +1,71 @@
-# Comparador-de-Genomas
-Algoritmo em python que recebe duas cadeias de bases nitrogenadas, faz a montagem dos nucleotideos e gera uma comparação visual entre elas.
+# 🔒 PDF Anonymizer
 
-## Segunda versão
-Esta versão recebe dois arquivos em formato .fasta contendo as cadeias a serem comparadas e gera um arquivo em html contendo a representação visual das duas cadeias bem como a ocorrência dos nucleotideos presentes nelas.
-Também gera um gráfico de dispersão dessas duas cadeias.
+Este projeto tem como objetivo **analisar arquivos PDF e remover ou anonimizar dados pessoais sensíveis**. Ele é capaz de identificar se o PDF contém texto digital ou é um documento escaneado (imagem), aplicar técnicas de *OCR*, *regex* e *machine learning* para extrair e identificar informações pessoais como CPF, nomes e outros dados identificáveis, e gerar uma nova versão do PDF com essas informações removidas ou mascaradas.
 
-Para que o mesmo funcione é preciso que os arquivos .fasta estejam dentro da pasta data
+## 🚀 Funcionalidades
 
-### modo de uso
->Coloque os arquivos .fasta na pasta data
->xecute o arquivo compare.exe ou abra o prompt de comando no diretório raiz do projeto
->execute o comando python compare.py
->selecione os arquivos e as opções de saídas desejadas 
+* 📄 Leitura de arquivos PDF
+* 🔍 Detecção automática do tipo de conteúdo (texto digital ou imagem escaneada)
+* 🧠 Identificação de dados pessoais com:
 
-"Caso não exista o programa vai criar uma pasta chamada output onde estarão o arquivo de saída" 
+  * Expressões regulares (regex) para dados como CPF
+  * Modelos de machine learning para identificar nomes, endereços, e outros dados sensíveis
+* 🖼️ Aplicação de OCR em PDFs escaneados (imagem)
+* ✂️ Remoção ou anonimização de dados pessoais
+* 📁 Geração de novo PDF com os dados anonimizados
 
-## Teoria
->DNA é uma molécula presente em todos os seres vivos, que é responsável por armazenar as características hereditárias. Ela é composta por sequências de nucleotídeos, que podem de quatro tipos: adenina, timina, citosina ou guanina.
->
-![image](https://github.com/Neves369/Comparador-de-Genomas/assets/63128431/cbebb21e-00ca-46bd-9a62-47f9fa43c687)
->Estrutura do DNA. Fonte: https://se.wikipedia.org/wiki/Fiila:Dna-base-flipping.svg
->
->"Computacionalmente" falando podemos representá-los através de 4 letras: A, T, C ou G.
+## 📦 Tecnologias Utilizadas
 
-## Estudo de caso
-Usando as sequências human_18s_rRNA_gene.fasta e escherichia_coli_strain_U_5_41_16S_rRNA_partial.fasta,
-presentes na pasta data, podemos avaliar se estruturas com funções parecidas (estamos usando sequências de RNA ribossomal) de organismos diferentes têm diferenças. Para isso vamos avaliar a quantidade de pares de nucleotídeos.
+* Python 3
+* [PyMuPDF (fitz)](https://pymupdf.readthedocs.io/)
+* [Tesseract OCR](https://github.com/tesseract-ocr/tesseract)
+* [Pytesseract](https://pypi.org/project/pytesseract/)
+* [Scikit-learn](https://scikit-learn.org/)
+* [spaCy](https://spacy.io/) ou outro modelo de NER para identificação de entidades
+* Regex
+* OpenCV (para pré-processamento de imagens)
 
-### Resultado
+## 🛠️ Como Usar
 
-![image](https://github.com/Neves369/Comparador-de-Genomas/assets/63128431/34c93e58-d89b-40f1-a119-9b03444be7ae)
-![densityChart](https://github.com/Neves369/Comparador-de-Genomas/assets/63128431/e9f52084-bae1-4b18-8061-231608344d8f)
+1. Clone o repositório:
 
+```bash
+git clone https://github.com/neves369/anonimizador-de-dados.git
+cd anonimizador-de-dados
+```
 
+2. Instale as dependências:
 
+```bash
+pip install -r requirements.txt
+```
 
+3. Certifique-se de ter o Tesseract OCR instalado e configurado no PATH.
+
+4. Execute o script:
+
+```bash
+python main.py caminho/para/arquivo.pdf
+```
+
+5. O novo arquivo PDF com os dados anonimizados será gerado na mesma pasta, com o sufixo `_anon.pdf`.
+
+## 📁 Estrutura do Projeto
+
+```
+pdf-anonymizer/
+│
+├── main.py              # Script principal
+├── requirements.txt     # Dependências do projeto
+└── README.md
+```
+
+## ⚠️ Aviso Legal
+
+**Não é recomendado para uso em produção sem auditoria de conformidade com leis como a LGPD ou GDPR**.
+
+## 📄 Licença
+
+Este projeto está licenciado sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+
+---
