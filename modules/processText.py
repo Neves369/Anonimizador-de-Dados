@@ -3,58 +3,63 @@ import os
 import fitz 
 import spacy
 
-# Verificação simples de CPF e Telefone
-def simple_find(filename):
-    caminho_arquivo = os.path.join('data', filename)
-    nome_arquivo, ext = os.path.splitext(filename)
-    caminho_saida = os.path.join('output', f"{nome_arquivo}_tarjado{ext}")
-
+def detectar_dados(filename):
+    caminho_arquivo = os.path.join("data", filename)
     doc = fitz.open(caminho_arquivo)
+    nlp = spacy.load("pt_core_news_lg")
+
+    dados_detectados = []
 
     padroes = [
-        (r'\d{3}\.\d{3}\.\d{3}-\d{2}', "XXX.XXX.XXX-XX"),  # CPF
-        (r'\d{2}\.\d{3}\.\d{3}-\d{1}', "XX.XXX.XXX-X"),  # RG
-        (r'\(\d{2}\)\s?\d{4,5}-\d{4}', "(XX) XXXXX-XXXX"), # Telefone
+        ("CPF", r"\d{3}\.\d{3}\.\d{3}-\d{2}"),
+        ("RG", r"\d{2}\.\d{3}\.\d{3}-\d{1}"),
+        ("Telefone", r"\(\d{2}\)\s?\d{4,5}-\d{4}"),
+        ("Email", r"\b[\w\.-]+@[\w\.-]+\.\w{2,}\b")
     ]
 
+    for i, pagina in enumerate(doc):
+        texto = pagina.get_text()
+        spacy_doc = nlp(texto)
+
+        # regex
+        for label, padrao in padroes:
+            for match in re.findall(padrao, texto):
+                for bbox in pagina.search_for(match):
+                    dados_detectados.append({
+                        "pagina": i,
+                        "texto": match,
+                        "label": label,
+                        "bbox": list(bbox)
+                    })
+
+    return dados_detectados
+
+def aplicar_anonimizacao(filename, dados_selecionados):
+    caminho = os.path.join("data", filename)
+    nome_base, ext = os.path.splitext(filename)
+    caminho_saida = os.path.join("output", f"{nome_base}_customizado{ext}")
+
+    doc = fitz.open(caminho)
+
+    for dado in dados_selecionados:
+        pagina = doc[dado["pagina"]]
+        bbox = fitz.Rect(dado["bbox"])
+        bbox.y0 += 5
+        bbox.y1 -= 5
+        pagina.add_redact_annot(bbox, fill=(0, 0, 0), text="[OCULTO]")
+        # texto_substituto = f"[{dado['label']} OCULTO]"
+
+        # pagina.add_redact_annot(
+        #     bbox,
+        #     fill=(1, 1, 1),
+        #     text=texto_substituto,
+        #     fontname="helv",
+        #     fontsize=8,
+        #     text_color=(0, 0, 0)
+        # )
+
     for pagina in doc:
-        texto_pagina = pagina.get_text()
-        for padrao, texto_substituto in padroes:
-            for match in re.findall(padrao, texto_pagina):
-                areas = pagina.search_for(match)
-                for area in areas:
-                    # Aplica a tarja e substitui o texto por texto genérico
-                    pagina.add_redact_annot(area, fill=(0, 0, 0), text=texto_substituto)
         pagina.apply_redactions(images=fitz.PDF_REDACT_IMAGE_NONE)
 
     doc.save(caminho_saida)
-    print(f"Novo arquivo gerado: {caminho_saida}")
-
-# Verificação profunda usando machine learning
-def extensive_find(filename):
-    import fitz
-    nlp = spacy.load("pt_core_news_lg")
-    caminho_saida = os.path.join('output', f"{os.path.splitext(filename)[0]}_tarjado_extensivo.pdf")
-    doc = fitz.open(os.path.join('output', f"{os.path.splitext(filename)[0]}_tarjado.pdf"))
-
-    entidades_sensiveis = ["PER", "LOC", "ORG", "DATE"]  # Pessoa, Local, Organização, Data
-
-    for pagina in doc:
-        texto_pagina = pagina.get_text()
-        doc_spacy = nlp(texto_pagina)
-        for ent in doc_spacy.ents:
-            if ent.label_ in entidades_sensiveis:
-                for match in re.findall(re.escape(ent.text), texto_pagina):
-                    areas = pagina.search_for(match)
-                    for area in areas:
-                        pagina.add_redact_annot(area, fill=(0, 0, 0), text="[DADO SENSÍVEL]")
-        pagina.apply_redactions(images=fitz.PDF_REDACT_IMAGE_NONE)
-
-    doc.save(caminho_saida)
-    print(f"Arquivo extensivamente anonimizado: {caminho_saida}")
-
-# Função principal para processar o texto do PDF
-def process_text(filename):
-    simple_find(filename)
-    extensive_find(filename)
-
+    return caminho_saida
