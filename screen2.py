@@ -10,16 +10,17 @@ def main(page: ft.Page):
     page.title = "Anonimizador"
     page.window_width = 1200
     page.window_height = 800
-    page.bgcolor = "#f5f5f5"
+    page.bgcolor = "#ececec"
     page.padding = 20
     page.scroll = ft.ScrollMode.AUTO
+    page.window.maximized = True
 
     nome_arquivo_copiado = ft.Ref[str]()
     dados_detectados = []
     checkboxes = []
 
     lista_dados = ft.Column(scroll=ft.ScrollMode.AUTO, height=350)
-    status = ft.Text()
+    status = ft.Text(f"Selecione um arquivo para continuar...", color="#666666", weight='bold')
     
     def abrir_pdf(filepath):
         if platform.system() == "Windows":
@@ -38,9 +39,20 @@ def main(page: ft.Page):
             shutil.copy(original_caminho, destino)
             nome_arquivo_copiado.current = nome_arquivo
             status.value = "Arquivo carregado. Clique em 'Detectar Dados'."
+            btn_detectar.visible= True
             page.update()
 
     def detectar(e):
+
+        selecionar_tudo_cb = ft.Checkbox(label=ft.Text(f"SELECIONAR TUDO", color="#666666", weight='bold'), value=False)
+
+        def selecionar_tudo_changed(e):
+            for cb in checkboxes:
+                cb.value = selecionar_tudo_cb.value
+            page.update()
+
+        selecionar_tudo_cb.on_change = selecionar_tudo_changed
+
         nonlocal dados_detectados, checkboxes
         if not nome_arquivo_copiado.current:
             status.value = "Nenhum arquivo selecionado."
@@ -59,8 +71,11 @@ def main(page: ft.Page):
             cb.data = dado
             checkboxes.append(cb)
             lista_dados.controls.append(cb)
+        
+        lista_dados.controls.insert(0, selecionar_tudo_cb)
 
-        status.value = f"{len(checkboxes)} dados encontrados."
+        status.value = f"{len(checkboxes)} dados encontrados. \nSelecione as informações que deseja ocultar..."
+        btn_anonimizar.visible= True
         page.update()
 
     def anonimizar_selecionados(e):
@@ -83,13 +98,19 @@ def main(page: ft.Page):
     # Container do cabeçalho
     header = ft.Container(
         content=ft.Row([
+            ft.Image(
+                src="assets/logo.png",
+                width=50,
+                height=50,
+                fit=ft.ImageFit.CONTAIN,
+            ),
             ft.Text(
                 "ANONIMIZADOR",
                 size=28,
                 weight=ft.FontWeight.BOLD,
-                color="#000000"
+                color="#666666"
             ),
-            ft.Container(expand=True),  # Espaçador
+            ft.Container(expand=True),
             ft.Text(
                 "versão 1.0",
                 size=14,
@@ -114,17 +135,17 @@ def main(page: ft.Page):
     # Botões do painel esquerdo
     btn_selecionar = ft.ElevatedButton("📂 Selecionar PDF", on_click=lambda _: abrir_picker.pick_files(
         dialog_title="Escolha um PDF", allow_multiple=False, allowed_extensions=["pdf"]
-    ), width=400)
-    btn_detectar = ft.ElevatedButton("🔍 Detectar Dados", on_click=detectar, width=400)
-    btn_anonimizar = ft.ElevatedButton("🔐 Anonimizar", on_click=anonimizar_selecionados, width=400)
-    botao_abrir_pdf = ft.ElevatedButton("📂 Abrir PDF", visible=False, width=400)
+    ), width=400, color="white")
+    btn_detectar = ft.ElevatedButton("🔍 Detectar Dados", visible=False, on_click=detectar, width=400, color="white")
+    btn_anonimizar = ft.ElevatedButton("🔐 Anonimizar", visible=False, on_click=anonimizar_selecionados, width=400, color="white")
+    botao_abrir_pdf = ft.ElevatedButton("📂 Abrir PDF", visible=False, width=400, color="white")
     
     # Painel esquerdo com botões
     painel_esquerdo = ft.Container(
         content=ft.Column([
             btn_selecionar,
             btn_detectar,
-            ft.Container(height=180),
+            # ft.Container(height=180),
             btn_anonimizar,
             botao_abrir_pdf
         ], 
@@ -192,10 +213,31 @@ def main(page: ft.Page):
         height=550
     )
     
-    # Layout principal
-    conteudo_principal = ft.Row([
+    # Agrupa os dois painéis em uma linha
+    linha_coluna_esquerda = ft.Row([
         painel_esquerdo,
         painel_lista,
+    ])
+
+    # Painel inferior de Log
+    painel_inferior = ft.Container(
+        content=status,
+        bgcolor="#ffffff",
+        padding=20,
+        border_radius=12,
+        width=610,
+        height=140
+    )
+
+    #  Coluna que agrupa os painéis
+    coluna_esquerda = ft.Column([
+      linha_coluna_esquerda,
+      painel_inferior
+    ])
+
+    # Layout principal
+    conteudo_principal = ft.Row([
+        coluna_esquerda,
         painel_direito
     ],
     alignment=ft.MainAxisAlignment.START,
@@ -204,7 +246,6 @@ def main(page: ft.Page):
     # Adicionar todos os elementos à página
     page.add(
         header,
-        status,
         conteudo_principal
     )
 
