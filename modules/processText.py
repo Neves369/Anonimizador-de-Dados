@@ -14,7 +14,8 @@ def detectar_dados(filename):
         ("CPF", r"\d{3}\.\d{3}\.\d{3}-\d{2}"),
         ("RG", r"\d{2}\.\d{3}\.\d{3}-\d{1}"),
         ("Telefone", r"\(\d{2}\)\s?\d{4,5}-\d{4}"),
-        ("Email", r"\b[\w\.-]+@[\w\.-]+\.\w{2,}\b")
+        ("Email", r"\b[\w\.-]+@[\w\.-]+\.\w{2,}\b"),
+        ("OAB", r"\d{3}\.\d{2}")
     ]
 
     for i, pagina in enumerate(doc):
