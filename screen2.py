@@ -1,9 +1,9 @@
 import os
 import flet as ft
 import shutil
-import subprocess
 import fitz 
 import platform
+import subprocess
 from modules import read
 from modules import processText
 
@@ -46,7 +46,7 @@ def main(page: ft.Page):
     dados_detectados = []
     checkboxes = []
 
-    lista_dados = ft.Column(scroll=ft.ScrollMode.AUTO, height=350)
+    lista_dados = ft.Column(scroll=ft.ScrollMode.AUTO, height=500)
     status = ft.Text(f"Selecione um arquivo para continuar...", color="#666666", weight='bold')
     
     def abrir_pdf(filepath):
@@ -148,6 +148,8 @@ def main(page: ft.Page):
         status.value = f"Anonimização concluída!"
         botao_abrir_pdf.visible = True
         botao_abrir_pdf.on_click = lambda _: abrir_pdf(caminho_saida)
+
+        shutil.rmtree("data/imagens")
         page.update()
 
     # Container do cabeçalho
