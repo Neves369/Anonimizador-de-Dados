@@ -42,7 +42,7 @@ def main(page: ft.Page):
             btn_detectar.visible= True
             page.update()
 
-    def detectar(e):
+       def detectar(e):
 
         selecionar_tudo_cb = ft.Checkbox(label=ft.Text(f"SELECIONAR TUDO", color="#666666", weight='bold'), value=False)
 
@@ -65,12 +65,18 @@ def main(page: ft.Page):
         checkboxes.clear()
         lista_dados.controls.clear()
 
-        for dado in dados_detectados:
-            label = ft.Text(f"[{dado['label']}] {dado['texto']}", color="#666666", weight='bold')
-            cb = ft.Checkbox(label=label, value=False)
-            cb.data = dado
-            checkboxes.append(cb)
-            lista_dados.controls.append(cb)
+        for tipo, lista in dados_detectados.items():
+            if lista:  # Só mostra a seção se houver dados desse tipo
+                # Adiciona o título da seção
+                lista_dados.controls.append(
+                    ft.Text(f"--- {tipo.upper()} ---", color="#575757", weight='bold', size=16)
+                )
+                for dado in lista:
+                    label = ft.Text(f"[{dado['label']}] {dado['texto']}", color="#666666", weight='bold')
+                    cb = ft.Checkbox(label=label, value=False)
+                    cb.data = dado
+                    checkboxes.append(cb)
+                    lista_dados.controls.append(cb)
         
         lista_dados.controls.insert(0, selecionar_tudo_cb)
 
