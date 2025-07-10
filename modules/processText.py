@@ -8,31 +8,41 @@ def detectar_dados(filename):
     doc = fitz.open(caminho_arquivo)
     nlp = spacy.load("pt_core_news_lg")
 
-    dados_detectados = []
+    sessoes = {
+        "CPF": [],
+        "RG": [],
+        "OAB": [],
+        "Email": [],
+        "Outros": []
+    }
 
     padroes = [
         ("CPF", r"\d{3}\.\d{3}\.\d{3}-\d{2}"),
         ("RG", r"\d{2}\.\d{3}\.\d{3}-\d{1}"),
         ("Telefone", r"\(\d{2}\)\s?\d{4,5}-\d{4}"),
-        ("Email", r"\b[\w\.-]+@[\w\.-]+\.\w{2,}\b")
+        ("Email", r"\b[\w\.-]+@[\w\.-]+\.\w{2,}\b"),
+        ("OAB", r"\d{3}\.\d{2}")
     ]
 
     for i, pagina in enumerate(doc):
         texto = pagina.get_text()
         spacy_doc = nlp(texto)
 
-        # regex
         for label, padrao in padroes:
             for match in re.findall(padrao, texto):
                 for bbox in pagina.search_for(match):
-                    dados_detectados.append({
+                    dado = {
                         "pagina": i,
                         "texto": match,
                         "label": label,
                         "bbox": list(bbox)
-                    })
+                    }
+                    if label in sessoes:
+                        sessoes[label].append(dado)
+                    else:
+                        sessoes["Outros"].append(dado)
 
-    return dados_detectados
+    return sessoes
 
 def aplicar_anonimizacao(filename, dados_selecionados):
     caminho = os.path.join("data", filename)
