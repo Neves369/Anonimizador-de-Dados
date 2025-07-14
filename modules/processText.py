@@ -3,8 +3,17 @@ import os
 import fitz 
 import spacy
 import sys
+from PIL import Image
+import pytesseract
 
-nlp = spacy.load("pt_core_news_lg")
+# def extrair_texto_ocr(caminho_imagem):
+#     """Usa OCR para extrair texto de uma imagem"""
+#     imagem = Image.open(caminho_imagem)
+#     texto = pytesseract.image_to_string(imagem, lang='por')
+#     return texto
+
+
+# nlp = spacy.load("pt_core_news_lg")
 def detectar_dados(filename):
     global nlp
     caminho_arquivo = os.path.join("data", filename)
@@ -34,7 +43,7 @@ def detectar_dados(filename):
         ("Telefone", r"\(\d{2}\)\s?\d{4,5}-\d{4}"),
         ("Email", r"\b[\w\.-]+@[\w\.-]+\.\w{2,}\b"),
         ("OAB", r"\b\d{3}\.?\d{3}[-/][A-Z]{2}\b"),
-        ("Endereço", r'\b(?:Rua|Avenida|Travessa|Praça|Rodovia|Estrada|Alameda|Largo|CEP|Vila)\s+[A-Za-zÀ-ÿ0-9\s\.\-]+(?:,\s*\d{1,5})?\b')
+        ("Endereço", r'\b(?:Rua|Avenida|Travessa|Praça|Rodovia|Estrada|Alameda|Largo|CEP:|CEP|Apto|apto.|Vila)\s+[A-Za-zÀ-ÿ0-9\s\.\-]+(?:,\s*\d{1,5})?\b')
 
     ]
 
@@ -59,6 +68,31 @@ def detectar_dados(filename):
                     })
 
     return dados_detectados
+
+# def detectar_dados_imagem(caminho_imagem):
+#     texto = extrair_texto_ocr(caminho_imagem)
+
+#     padroes = [
+#         ("CPF", r'\b\d{3}\.\d{3}\.\d{3}-\d{2}\b'),
+#         ("RG", r'\b(?:\d{2}\.\d{3}\.\d{3}-\d{1}|\d{6,9}-\d{1}|\d{9,10})\b'),
+#         ("Telefone", r"\(\d{2}\)\s?\d{4,5}-\d{4}"),
+#         ("Email", r"\b[\w\.-]+@[\w\.-]+\.\w{2,}\b"),
+#         ("OAB", r"\b\d{3}\.?\d{3}[-/][A-Z]{2}\b"),
+#         ("Endereço", r'\b(?:Rua|Avenida|Travessa|Praça|Rodovia|Estrada|Alameda|Largo|CEP|Vila)\s+[A-Za-zÀ-ÿ0-9\s\.\-]+(?:,\s*\d{1,5})?\b')
+#     ]
+
+#     dados_detectados = []
+
+#     for label, padrao in padroes:
+#         for match in re.findall(padrao, texto):
+#             dados_detectados.append({
+#                 "texto": match,
+#                 "label": label,
+#                 "pagina": None,
+#                 "bbox": None  # Se quiser, pode usar pytesseract.image_to_data para isso
+#             })
+
+#     return dados_detectados
 
 
 def aplicar_anonimizacao(filename, dados_selecionados):

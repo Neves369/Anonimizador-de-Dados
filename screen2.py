@@ -171,7 +171,7 @@ def main(page: ft.Page):
 
         # Atualiza o status
         status.value = (
-            f"{len(checkboxes)} dados encontrados.\n"
+            f"{len(checkboxes)} possíveis dados encontrados.\n"
             f"{resumo_texto}\n"
             f"Selecione as informações que deseja ocultar..."
         )
@@ -313,6 +313,15 @@ def main(page: ft.Page):
     # Painel central lista de dados
     painel_lista = ft.Container(
         content=ft.Column([
+            ft.Text(
+                "Dados Detectados",
+                size=18,
+                color="#999999",
+                text_align=ft.TextAlign.CENTER
+            ),
+            
+            status,
+            # Exibe a lista de dados detectados
           lista_dados
         ], 
         scroll=ft.ScrollMode.AUTO,
