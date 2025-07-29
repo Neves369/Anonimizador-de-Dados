@@ -1,6 +1,6 @@
 import os
 import sys
-import fitz  # PyMuPDF
+import fitz
 
 #retorna o caminho absoluto de um recurso (como uma imagem, arquivo etc.)
 def resource_path(relative_path):

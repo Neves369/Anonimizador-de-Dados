@@ -3,6 +3,7 @@ import os
 import shutil
 import flet as ft
 from modules import processText
+from modules.log import log_mensagem
 
 def anonimizar_selecionados(
     e,
@@ -10,12 +11,13 @@ def anonimizar_selecionados(
     nome_arquivo_copiado: ft.Ref[str],
     checkboxes: list,
     status: ft.Text,
-    botao_abrir_pdf: ft.ElevatedButton,
+    btn_abrir_pdf: ft.IconButton,
     painel_direito: ft.Container,
     gerar_imagens_do_pdf,
     abrir_pdf,
 ):
     selecionados = [cb.data for cb in checkboxes if cb.value]
+    
     if not selecionados:
         status.value = "Nenhum dado selecionado."
         page.update()
@@ -48,11 +50,11 @@ def anonimizar_selecionados(
                 os.remove(caminho_img)
 
     except Exception as erro:
-        print(f"[Erro ao limpar arquivos antigos] {erro}")
+        log_mensagem(f"[Erro ao limpar arquivos antigos] {erro}")
 
     status.value = "Anonimização concluída!"
-    botao_abrir_pdf.visible = True
-    botao_abrir_pdf.on_click = lambda _: abrir_pdf(caminho_saida)
+    btn_abrir_pdf.visible = True
+    btn_abrir_pdf.on_click = lambda _: abrir_pdf(caminho_saida)
 
     nome_arquivo_anonimizado = os.path.basename(caminho_saida)
     nome_base_anonimizado, _ = os.path.splitext(nome_arquivo_anonimizado)

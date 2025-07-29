@@ -12,7 +12,7 @@ def detectar(
     page,
     dropdown_filtro,
     lista_dados,
-    painel_direito,
+    painel_pdf,
     btn_anonimizar,
     status,
     nome_arquivo_copiado,
@@ -25,7 +25,7 @@ def detectar(
     dropdown_filtro.value = "Todos"
     dropdown_filtro.update()
 
-    selecionar_tudo_cb = ft.Checkbox(label=ft.Text("SELECIONAR TODOS OS DADOS", color="#666666", weight='bold'), value=False)
+    selecionar_tudo_cb = ft.Checkbox(label=ft.Text("SELECIONAR TODOS OS DADOS", color="#ffffff", weight='bold'), value=False)
 
     def selecionar_tudo_changed(e):
         for cb in checkboxes:
@@ -55,12 +55,12 @@ def detectar(
 
     caminhos_imagens = gerar_imagens_do_pdf(caminho_pdf_demarcado, pasta_imagens_demarcadas)
 
-    painel_direito.content.controls.clear()
-    painel_direito.content.controls.append(
+    painel_pdf.content.controls.clear()
+    painel_pdf.content.controls.append(
         ft.Text(f"Visualização do PDF Demarcado ({len(caminhos_imagens)} páginas)", size=20, weight="bold", color="#555555")
     )
     for caminho in caminhos_imagens:
-        painel_direito.content.controls.append(
+        painel_pdf.content.controls.append(
             ft.Container(
                 content=ft.Image(src=caminho, width=600, fit=ft.ImageFit.CONTAIN),
                 border=ft.border.all(2, "#cccccc"),
@@ -84,7 +84,7 @@ def detectar(
         grupo_checkboxes = []
 
         selecionar_categoria_cb = ft.Checkbox(
-            label=ft.Text(f"Selecionar todos [{tipo.upper()}]", color="#666666", weight="bold"),
+            label=ft.Text(f"Selecionar todos [{tipo.upper()}]", color=page.theme_mode_text_color, weight="bold"),
             value=False
         )
 
@@ -93,11 +93,11 @@ def detectar(
                 cb.value = e.control.value
             page.update()
 
-        lista_dados.controls.append(ft.Divider(thickness=1, color="#dddddd"))
+        lista_dados.controls.append(ft.Divider(thickness=1, color=page.theme_mode_text_color))
         lista_dados.controls.append(selecionar_categoria_cb)
 
         for dado in lista:
-            label = ft.Text(f"[{dado['label']}] {dado['texto']}", color="#666666", weight='bold')
+            label = ft.Text(f"[{dado['label']}] {dado['texto']}", color=page.theme_mode_text_color, weight='bold')
             cb = ft.Checkbox(label=label, value=False)
             cb.data = dado
             grupo_checkboxes.append(cb)
@@ -105,13 +105,13 @@ def detectar(
             lista_dados.controls.append(cb)
 
         selecionar_categoria_cb.on_change = partial(toggle_grupo_checkbox, grupo=grupo_checkboxes)
-        lista_dados.controls.append(ft.Divider(thickness=1, color="#dddddd"))
+        lista_dados.controls.append(ft.Divider(thickness=1, color=page.theme_mode_text_color))
 
     # --- IMAGENS DETECTADAS ---
     if imagens_detectadas:
         grupo_imgs = []
         selecionar_imgs_cb = ft.Checkbox(
-            label=ft.Text("Selecionar todas as IMAGENS", color="#666666", weight='bold'),
+            label=ft.Text("Selecionar todas as IMAGENS", color=page.theme_mode_text_color, weight='bold'),
             value=False
         )
 
@@ -131,14 +131,14 @@ def detectar(
             checkboxes.append(cb)
             lista_dados.controls.append(cb)
 
-        lista_dados.controls.append(ft.Divider(thickness=1, color="#dddddd"))
+        lista_dados.controls.append(ft.Divider(thickness=1, color=page.theme_mode_text_color))
 
     # --- PÁGINAS INTEIRAS ---
     doc = fitz.open(caminho_pdf_original)
     grupo_paginas = []
 
     selecionar_paginas_cb = ft.Checkbox(
-        label=ft.Text("Selecionar TODAS as PÁGINAS INTEIRAS", color="#666666", weight='bold'),
+        label=ft.Text("Selecionar TODAS as PÁGINAS INTEIRAS", color=page.theme_mode_text_color, weight='bold'),
         value=False
     )
 
@@ -152,7 +152,7 @@ def detectar(
 
     for i in range(len(doc)):
         cb_pagina = ft.Checkbox(
-            label=ft.Text(f"Página {i + 1} inteira", color="#993333", weight='bold'),
+            label=ft.Text(f"Página {i + 1} inteira", color=page.theme_mode_text_color, weight='bold'),
             value=False
         )
         cb_pagina.data = {"pagina": i, "completa": True}

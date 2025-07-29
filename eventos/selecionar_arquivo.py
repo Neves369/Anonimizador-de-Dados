@@ -3,6 +3,7 @@ import shutil
 import platform
 import subprocess
 import flet as ft  # necessário para tipos como FilePickerResultEvent
+from modules.log import log_mensagem
 
 def abrir_pdf(filepath):
     if platform.system() == "Windows":
@@ -19,12 +20,12 @@ def selecione_arquivo(
     lista_dados: ft.ListView,
     dados_detectados: list,
     checkboxes: list,
-    btn_anonimizar: ft.ElevatedButton,
-    botao_abrir_pdf: ft.ElevatedButton,
-    painel_direito: ft.Container,
+    btn_anonimizar: ft.IconButton,
+    btn_selecionar_pdf: ft.IconButton,
+    painel_pdf: ft.Container,
     nome_arquivo_copiado: ft.Ref[str],
     status: ft.Text,
-    btn_detectar: ft.ElevatedButton,
+    btn_detectar: ft.IconButton,
     gerar_imagens_do_pdf
 ):
     if e.files:
@@ -36,8 +37,8 @@ def selecione_arquivo(
         dados_detectados.clear()
         checkboxes.clear()
         btn_anonimizar.visible = False
-        botao_abrir_pdf.visible = False
-        painel_direito.content.controls.clear()
+        btn_selecionar_pdf.visible = True
+        painel_pdf.content.controls.clear()
 
         destino = os.path.join("data", nome_arquivo)
         os.makedirs("data", exist_ok=True)
@@ -47,7 +48,7 @@ def selecione_arquivo(
         if original_abs != destino_abs:
             shutil.copy(original_abs, destino_abs)
         else:
-            print("O arquivo já está no diretório de destino.")
+            log_mensagem("O arquivo já está no diretório de destino.")
 
         nome_arquivo_copiado.current = nome_arquivo
         status.value = "Arquivo carregado. Clique em 'Detectar Dados'."
@@ -61,12 +62,12 @@ def selecione_arquivo(
 
         caminhos_imagens = gerar_imagens_do_pdf(destino_abs, pasta_imagens)
 
-        painel_direito.content.controls.append(
+        painel_pdf.content.controls.append(
             ft.Text(f"Visualização do PDF ({len(caminhos_imagens)} páginas)", size=20, weight="bold", color="#555555")
         )
 
         for caminho in caminhos_imagens:
-            painel_direito.content.controls.append(
+            painel_pdf.content.controls.append(
                 ft.Container(
                     content=ft.Image(src=caminho, width=600, fit=ft.ImageFit.CONTAIN),
                     border=ft.border.all(2, "#cccccc"),

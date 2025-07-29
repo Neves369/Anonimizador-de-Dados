@@ -1,6 +1,7 @@
 import re
 import os
 import fitz 
+from modules.log import log_mensagem
 
 from PIL import Image
 
@@ -27,25 +28,26 @@ def detectar_dados(filename):
     caminho_arquivo = os.path.join("data", filename)
     doc = fitz.open(caminho_arquivo)
 
-    print("Abrindo:", caminho_arquivo)
-    print("Arquivo existe?", os.path.exists(caminho_arquivo))
+    log_mensagem("Abrindo:", caminho_arquivo)
+    log_mensagem("Arquivo existe?", os.path.exists(caminho_arquivo))
 
     if pdf_possui_texto(caminho_arquivo):
-        print("📄 O PDF contém texto extraível.")
+        log_mensagem("📄 O PDF contém texto extraível.")
     else:
-        print("🖼️ O PDF é imagem (escaneado, sem texto).")
+        log_mensagem("🖼️ O PDF é imagem (escaneado, sem texto).")
 
-    print("Modelo spaCy já carregado. Reutilizando.") 
+    log_mensagem("Modelo spaCy já carregado. Reutilizando.") 
 
     dados_detectados = []
 
     padroes = [
-        ("CPF", r'\b\d{3}\.?\d{3}\.?\d{3}-?\d{2}\b|\b\d{11}\b|\b\d{7}[\s\n]?\d{4}\b|\b\d{5}[\s\n]?\d{6}\b|\b\d{8}[\s\n]?\d{3}\b'),
-        ("RG", r'\b(?:\d{3}\.\d{3}|\d{2}\.\d{3,6}-\d{1,2}|\d{2}\.\d{3}\.\d{3}-\d{1}|\d{3}\.\d{3}\.\d{2}-\d{1}|\d{6,9}-\d{1}|\d{9,10}|\d{11}|\d{7})\b'),
+        ("CPF", r'\b\d{3}\.?\d{3}\.?\d{3}-?\s*\d{2}\b|\b\d{11}\b|\b\d{7}[\s\n]?\d{4}\b|\b\d{5}[\s\n]?\d{6}\b|\b\d{8}[\s\n]?\d{3}\b'),
+        ("RG", r'\b(?:\d{3}[.\s]?\d{3}[.\s]?\d{3}|\d{2}\.\d{3,6}-\d{1,2}|\d{2}\.\d{3}\.\d{3}-\d{1}|\d{3}\.\d{3}\.\d{2}-\d{1}|\d{6,9}-\d{1}|\d{9,10}|\d{11}|\d{7})\b'),
         ("Telefone", r"\(\d{2}\)\s?\d{4,5}-\d{4}"),
         ("Email", r"\b[\w\.-]+@[\w\.-]+\.\w{2,}\b"),
         ("OAB", r"\b\d{3}\.?\d{3}[-/][A-Z]{2}\b"),
-        ("Endereço", r'\b(?:Rua|casa|Bloco|condomínio|Avenida|Av.|Travessa|Praça|Rodovia|Estrada|Alameda|Largo|Apto|apto.|Vila|Quadra|QD|Lote|lOTE|CEP:|CEP)\s+[A-Za-zÀ-ÿ0-9\s\.\-]+(?:,\s*\d{1,5})?\b')
+        ("CEP", r'\b\d{2}\.\d{3}-\d{3}\b'),
+        ("Endereço", r'\b(?:Rua|Bairro|endereço|casa|Bloco|condomínio|Avenida|Av.|Travessa|Praça|Rodovia|Estrada|Alameda|Largo|Apto|apto.|Vila|Quadra|QD|Lote|lOTE|CEP:|CEP)\s+[A-Za-zÀ-ÿ0-9\s\.\-]+(?:,\s*\d{1,5})?\b')
     ]
 
     for i, pagina in enumerate(doc):
@@ -88,8 +90,8 @@ def aplicar_anonimizacao(filename, dados_selecionados):
             pagina.add_redact_annot(bbox, fill=(0, 0, 0), text="[OCULTO]")
         else:
             bbox = fitz.Rect(dado["bbox"])
-            # bbox.y0 += 2
-            # bbox.y1 -= 2
+            # bbox.y0 += 7
+            # bbox.y1 -= 7
             pagina.add_redact_annot(bbox, fill=(0, 0, 0), text="[OCULTO]")
 
     for dado in [d for d in dados_selecionados if d.get("tipo") == "imagem"]:
@@ -109,7 +111,7 @@ def aplicar_anonimizacao(filename, dados_selecionados):
                 bbox_imagem = pagina.get_image_bbox(xref)
                 pagina.add_redact_annot(bbox_imagem, fill=(0, 0, 0))
             except Exception as e:
-                print(f"Erro ao ocultar imagem xref {xref} na página {dado['pagina']}: {e}")
+                log_mensagem(f"Erro ao ocultar imagem xref {xref} na página {dado['pagina']}: {e}")
 
     for pagina in doc:
         pagina.apply_redactions(images=fitz.PDF_REDACT_IMAGE_NONE)
@@ -165,7 +167,7 @@ def demarcar_dados(filename, dados_detectados):
 
     doc.save(caminho_saida)
     doc.close()
-    print(f"Arquivo com demarcação salvo em: {caminho_saida}")
+    log_mensagem(f"Arquivo com demarcação salvo em: {caminho_saida}")
     return caminho_saida
 
 
