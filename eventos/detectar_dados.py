@@ -2,10 +2,13 @@ import os
 import flet as ft
 import shutil
 import fitz
+import helpers
 from modules import processText
+from modules import processImage
 from collections import defaultdict
 from functools import partial
 
+teste = 'escaneado'  # ou 'texto', dependendo do tipo de processamento
 
 def detectar(
     e,
@@ -41,19 +44,31 @@ def detectar(
     status.value = "Detectando dados..."
     page.update()
 
-    dados = processText.detectar_dados(nome_arquivo_copiado.current)
+    if teste == 'texto':
+        dados = processText.detectar_dados(nome_arquivo_copiado.current)
+    elif teste == 'escaneado':
+        dados = processImage.detectar_dados(nome_arquivo_copiado.current)
+
     dados_detectados.clear()
     dados_detectados.extend(dados)
 
     caminho_pdf_original = os.path.join("data", nome_arquivo_copiado.current)
-    caminho_pdf_demarcado = processText.demarcar_dados(nome_arquivo_copiado.current, dados_detectados)
+    
+    if teste == 'texto':
+        caminho_pdf_demarcado = processText.demarcar_dados(nome_arquivo_copiado.current, dados_detectados)
+    elif teste == 'escaneado':
+        caminho_pdf_demarcado = processImage.demarcar_dados(nome_arquivo_copiado.current, dados_detectados)
 
     nome_base, _ = os.path.splitext(nome_arquivo_copiado.current)
     pasta_imagens_demarcadas = os.path.join("data", "imagens", f"{nome_base}-DETECTADO")
     if os.path.exists(pasta_imagens_demarcadas):
         shutil.rmtree(pasta_imagens_demarcadas)
 
-    caminhos_imagens = gerar_imagens_do_pdf(caminho_pdf_demarcado, pasta_imagens_demarcadas)
+    if teste == 'texto':
+        caminhos_imagens = gerar_imagens_do_pdf(caminho_pdf_demarcado, pasta_imagens_demarcadas)
+    elif teste == 'escaneado':
+        caminhos_imagens = helpers.gerar_caminhos_imagens_existentes(os.path.join("data", "imagens", f"{nome_base}"))
+
 
     painel_pdf.content.controls.clear()
     painel_pdf.content.controls.append(
@@ -71,7 +86,8 @@ def detectar(
             )
         )
 
-    imagens_detectadas = processText.detectar_imagens(caminho_pdf_original)
+    if teste == 'texto':
+        imagens_detectadas = processText.detectar_imagens(caminho_pdf_original)
 
     checkboxes.clear()
     lista_dados.controls.clear()

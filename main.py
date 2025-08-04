@@ -4,7 +4,6 @@ import shutil
 import subprocess
 import fitz
 import platform
-from modules import read
 from modules import processText 
 from eventos.detectar_dados import detectar
 from eventos.selecionar_arquivo import selecione_arquivo
@@ -20,9 +19,6 @@ from modules import log
 import sys 
 
 logo_img = ft.Ref[ft.Image]()
-
-
-
 
 
 def resource_path(relative_path):

@@ -71,7 +71,6 @@ def detectar_dados(filename):
 
     return dados_detectados
 
-
 def aplicar_anonimizacao(filename, dados_selecionados):
     caminho = os.path.join("data", filename)
     nome_base, ext = os.path.splitext(filename)
@@ -158,6 +157,8 @@ def demarcar_dados(filename, dados_detectados):
 
     doc = fitz.open(caminho)
 
+    print(f"Demarcando dados detectados no arquivo: {caminho}")
+
     for dado in dados_detectados:
         pagina = doc[dado["pagina"]]
         bbox = fitz.Rect(dado["bbox"])
@@ -169,7 +170,6 @@ def demarcar_dados(filename, dados_detectados):
     doc.close()
     log_mensagem(f"Arquivo com demarcação salvo em: {caminho_saida}")
     return caminho_saida
-
 
 def detectar_imagens(caminho_pdf):
     doc = fitz.open(caminho_pdf)
